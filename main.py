@@ -1,4 +1,3 @@
-import datetime
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -131,6 +130,15 @@ k_means = KMeans(n_clusters=3)
 k_means.fit(x_transformed)
 yhat = k_means.predict(x_transformed)
 the_data["clusters"] = yhat
+
+# produce variables most correlated with  the clusters
+corr_matrix = the_data.corr()
+corr_matrix["clusters"].drop("clusters", axis=0).sort_values(ascending=False).plot(kind="bar")
+
+sns.displot(the_data, x="Income", hue="clusters", palette="viridis")
+
+sns.displot(the_data, x="total_spent", hue="clusters", palette="viridis")
+
 colors = {0:'red', 1:'green', 2:'blue'}
 fig, ax = plt.subplots()
 for key, group in the_data.groupby("clusters"):
@@ -138,8 +146,22 @@ for key, group in the_data.groupby("clusters"):
 # same can be plotted like this
 # sns.scatterplot(x="Income", y="total_spent", data=the_data, hue="clusters")
 
-# produce variables most correlated with  the clusters
-corr_matrix = the_data.corr()
-corr_matrix["clusters"].drop("clusters", axis=0).sort_values(ascending=False).plot(kind="bar")
+the_data[["technology", "clusters"]].boxplot(column="technology", by="clusters")
 
-sns.displot(the_data, x="Income", hue="clusters", palette="viridis")
+clusters_marital = the_data[["clusters", "Marital_Status"]].groupby(["clusters", "Marital_Status"]).size().reset_index(name="counts")
+clusters_marital = clusters_marital.pivot(index="clusters", columns="Marital_Status", values="counts")
+clusters_marital.plot(kind="bar", stacked=True, rot=0)
+
+clusters_education = the_data[["clusters", "Education"]].groupby(["clusters", "Education"]).size().reset_index(name="counts")
+clusters_education = clusters_education.pivot(index="clusters", columns="Education", values="counts")
+clusters_education.plot(kind="bar", stacked=True, rot=0)
+
+clusters_children = the_data[["clusters", "children"]].groupby(["clusters", "children"]).size().reset_index(name="counts")
+clusters_children = clusters_children.pivot(index="clusters", columns="children", values="counts")
+clusters_children.plot(kind="bar", stacked=True, rot=0)
+
+the_data[["NumDealsPurchases", "clusters"]].boxplot(column="NumDealsPurchases", by="clusters")
+
+the_data[["months_enrolled", "clusters"]].boxplot(column="months_enrolled", by="clusters")
+
+the_data[["Complain", "clusters"]].groupby(["clusters"]).sum().plot(kind="bar", rot=0)
